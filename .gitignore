@@ -103,3 +103,7 @@ venv.bak/
 # mypy
 .mypy_cache/*.pdf
 *.json
+
+images
+graph
+graph.pdf
