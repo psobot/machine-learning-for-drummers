@@ -16,11 +16,6 @@ from model_utils import evaluate_model  # , explain_model
 from sklearn.tree import DecisionTreeClassifier
 
 
-def train_model(features, classes, max_depth=3):
-    """This method trains a DecisionTreeClassifier on our input features."""
-    return DecisionTreeClassifier(max_depth=max_depth).fit(features, classes)
-
-
 def train_and_evaluate_model():
     # First, let's read all of the features that we got from feature_extract.
     # Fun fact: you could do ./feature_extract.py | ./classifier.py to execute
@@ -42,7 +37,7 @@ def train_and_evaluate_model():
 
     # ...and we do the training, which creates our model!
     # vvv MACHINE LEARNING HAPPENS ON THIS LINE BELOW vvv
-    model = train_model(training_features, training_classes)
+    model = DecisionTreeClassifier().fit(training_features, training_classes)
     # ^^^ MACHINE LEARNING HAPPENS ON THIS LINE ABOVE ^^^
 
     # This line writes out a .pdf file of the model's decision tree.

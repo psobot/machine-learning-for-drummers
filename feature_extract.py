@@ -24,38 +24,45 @@ from audio_utils import normalized, \
     average_eq_bands
 
 
-def features_for(file):
+def load_and_trim(file):
     y, rate = librosa.load(file, mono=True)
     y = normalized(y)
     trimmed = trim_data(y)
+    return trimmed, rate
 
-    loudness_window_in_seconds = 0.10
-    loudness_window_in_samples = int(rate * loudness_window_in_seconds)
 
-    fundamental, fundamental_stddev = poorly_estimate_fundamental(y, rate)
+def features_for(file):
+    # Load and trim the audio file to only the portions that aren't silent.
+    audio, rate = load_and_trim(file)
 
-    # No matter how many EQ bands we have, let's add them to the features dict.
-    eq_bands = {
-        "average_eq_%d" % i: value
-        for (i, value)
-        in enumerate(average_eq_bands(y, 3))
-    }
+    # Use poorly_estimate_fundamental to figure out what the rough pitch is,
+    # along with the standard deviation - how much that pitch varies.
+    fundamental, fundamental_stddev = poorly_estimate_fundamental(audio, rate)
+
+    # Like an equalizer, find out how loud each "frequency band" is here.
+    # In this case, we're just splitting up the audio spectrum into three
+    # very wide sections, low, mid, and high.
+    low, mid, high = average_eq_bands(audio, 3)
 
     features = {
-        "duration": librosa.get_duration(trimmed, rate),
-        "start_loudness": loudness_at(
-            trimmed, 0, loudness_window_in_samples),
-        "mid_loudness": loudness_at(
-            trimmed, len(trimmed) / 2, loudness_window_in_samples),
-        "end_loudness": loudness_at(
-            trimmed,
-            len(trimmed) - loudness_window_in_samples / 2,
-            loudness_window_in_samples),
-        "fundamental_in_hertz": fundamental,
-        "fundamental_deviation": fundamental_stddev
+        "duration":              librosa.get_duration(audio, rate),
+        "start_loudness":        loudness_at(audio, 0),
+        "mid_loudness":          loudness_at(audio, len(audio) / 2),
+        "end_loudness":          loudness_at(audio, len(audio)),
+        "fundamental_freq":      fundamental,
+        "fundamental_deviation": fundamental_stddev,
+        "average_eq_low":        low,
+        "average_eq_mid":        mid,
+        "average_eq_high":       high,
     }
 
-    features.update(eq_bands)
+    # No matter how many additional EQ bands we have, let's add them to
+    # the features dict.
+    features.update({
+        "average_eq_%d" % i: value
+        for (i, value)
+        in enumerate(average_eq_bands(audio, 40))
+    })
 
     return features
 
@@ -71,4 +78,8 @@ def extract_features(data_dir="./data/"):
     print(json.dumps(features, indent=4, sort_keys=True))
 
 if __name__ == "__main__":
-    extract_features()
+    import sys
+    if sys.argv[-1].endswith('.py'):
+        extract_features()
+    else:
+        extract_features(sys.argv[-1])

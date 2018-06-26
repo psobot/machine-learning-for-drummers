@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import math
 
 
 def read_data():
@@ -38,6 +39,8 @@ def read_data():
                 feature_value = 1000000.
             if feature_value < -1000000.:
                 feature_value = -1000000.
+            if math.isnan(feature_value):
+                feature_value = 0
             feature_vector.append(feature_value)
 
         features.append(feature_vector)

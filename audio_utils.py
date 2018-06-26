@@ -1,4 +1,5 @@
 import numpy
+from numpy import float32
 import librosa
 
 neg80point8db = 0.00009120108393559096
@@ -27,11 +28,31 @@ def average_eq_bands(y, bands=3):
         frequency_spectrogram_data, axis=1).astype(numpy.float32)])
 
 
-def loudness_at(data, pos, window=40):
-    window_start = max(0, pos - window / 2)
-    window_end = min(len(data), window_start + window)
+def eq_vector(data, bands=3, num_windows=100):
+    frequency_spectrogram_data = librosa.stft(data, bands + 1)
+    window_size = frequency_spectrogram_data.shape[1] / num_windows
+    for i in xrange(num_windows):
+        start = i * window_size
+        end = min(len(frequency_spectrogram_data), start + window_size)
+        yield list([float(x) for x in numpy.mean(
+            frequency_spectrogram_data[:, start:end], axis=1).astype(float32)])
+
+
+def loudness_at(data, pos, window_size=100):
+    window_start = max(0, pos - window_size / 2)
+    window_end = min(len(data), window_start + window_size)
+    if (window_end - window_start) < window_size:
+        window_start = max(0, window_end - window_size)
     windowed = data[window_start:window_end]
     return root_mean_square(windowed)
+
+
+def loudness_vector(data, num_windows=100):
+    window_size = len(data) / num_windows
+    for i in xrange(num_windows):
+        start = i * window_size
+        end = min(len(data), start + window_size)
+        yield root_mean_square(data[start:end])
 
 
 def normalized(list):
