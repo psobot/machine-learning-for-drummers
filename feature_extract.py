@@ -2,7 +2,6 @@ from __future__ import print_function
 
 # importing os gives us access to methods we need to manipulate paths
 import os
-import sys
 import json
 
 # librosa is a great all-around audio handling library in Python.
@@ -20,8 +19,10 @@ from glob import glob
 from audio_utils import normalized, \
     trim_data, \
     loudness_at, \
+    loudness_of, \
     poorly_estimate_fundamental, \
-    average_eq_bands
+    average_eq_bands, \
+    split_into
 
 
 def load_and_trim(file):
@@ -35,34 +36,25 @@ def features_for(file):
     # Load and trim the audio file to only the portions that aren't silent.
     audio, rate = load_and_trim(file)
 
-    # Use poorly_estimate_fundamental to figure out what the rough pitch is,
-    # along with the standard deviation - how much that pitch varies.
-    fundamental, fundamental_stddev = poorly_estimate_fundamental(audio, rate)
+    features = {"duration": librosa.get_duration(audio, rate)}
 
-    # Like an equalizer, find out how loud each "frequency band" is here.
-    # In this case, we're just splitting up the audio spectrum into three
-    # very wide sections, low, mid, and high.
-    low, mid, high = average_eq_bands(audio, 3)
+    # Let's split up the audio file into chunks
+    for (i, section) in enumerate(split_into(audio, 10)):
+        # And in each of those chunks:
+        # ...get the loudness for that chunk
+        features["loudness_%d" % i] = loudness_of(section)
 
-    features = {
-        "duration":              librosa.get_duration(audio, rate),
-        "start_loudness":        loudness_at(audio, 0),
-        "mid_loudness":          loudness_at(audio, len(audio) / 2),
-        "end_loudness":          loudness_at(audio, len(audio)),
-        "fundamental_freq":      fundamental,
-        "fundamental_deviation": fundamental_stddev,
-        "average_eq_low":        low,
-        "average_eq_mid":        mid,
-        "average_eq_high":       high,
-    }
+        # Use poorly_estimate_fundamental to figure out
+        # what the rough pitch is, along with the standard
+        # deviation - how much that pitch varies.
+        fundamental, fundamental_stddev = \
+            poorly_estimate_fundamental(section, rate)
+        features["fundamental_%d" % i] = fundamental
+        features["fundamental_stddev_%d" % i] = fundamental_stddev
 
-    # No matter how many additional EQ bands we have, let's add them to
-    # the features dict.
-    features.update({
-        "average_eq_%d" % i: value
-        for (i, value)
-        in enumerate(average_eq_bands(audio, 40))
-    })
+        # ...make a feature out of each of 25 EQ bands.
+        for (j, value) in enumerate(average_eq_bands(section, 99)):
+            features["average_eq_%d_%d" % (i, j)] = value
 
     return features
 

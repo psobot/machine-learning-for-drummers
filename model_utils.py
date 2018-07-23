@@ -8,7 +8,14 @@ import numpy
 from sklearn.tree import export_graphviz
 
 
-def evaluate_model(model, features, classes, sample_names, class_names):
+def evaluate_model(
+    model,
+    features,
+    classes,
+    sample_names,
+    class_names,
+    output=True
+):
     total_correct = 0.0
     for i, (feature, _class) in \
             enumerate(zip(features, classes)):
@@ -20,22 +27,24 @@ def evaluate_model(model, features, classes, sample_names, class_names):
         accuracy_string = u"✅" if accurate else u"❌"
         if accurate:
             total_correct += 1.
-            print(
-                "\t%s Predicted %s as %s." % (
-                    accuracy_string,
-                    sample_names[i],
-                    class_names[predicted_class]
+            if output:
+                print(
+                    "\t%s Predicted %s as %s." % (
+                        accuracy_string,
+                        sample_names[i],
+                        class_names[predicted_class]
+                    )
                 )
-            )
         else:
-            print(
-                "\t%s Predicted %s as %s, was actually %s." % (
-                    accuracy_string,
-                    sample_names[i],
-                    class_names[predicted_class],
-                    class_names[_class]
+            if output:
+                print(
+                    "\t%s Predicted %s as %s, was actually %s." % (
+                        accuracy_string,
+                        sample_names[i],
+                        class_names[predicted_class],
+                        class_names[_class]
+                    )
                 )
-            )
     print("Total of %d correct of %d. (%2.2f%%)" % (
         total_correct,
         len(features),

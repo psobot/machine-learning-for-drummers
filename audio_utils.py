@@ -11,6 +11,10 @@ def root_mean_square(data):
     return float(numpy.sqrt(numpy.mean(numpy.square(data))))
 
 
+def split_into(data, num):
+    return numpy.array_split(data, num)
+
+
 def poorly_estimate_fundamental(y, sr):
     pitches, magnitudes = librosa.core.piptrack(y=y, sr=sr, fmin=10, fmax=1600)
     fundamental_over_time = [
@@ -22,10 +26,11 @@ def poorly_estimate_fundamental(y, sr):
         float(numpy.std(fundamental_over_time))
 
 
-def average_eq_bands(y, bands=3):
-    frequency_spectrogram_data = librosa.stft(y, bands + 1)
+def average_eq_bands(y, bands=15):
+    frequency_spectrogram_data = librosa.amplitude_to_db(
+        librosa.magphase(librosa.stft(y, bands + 1))[0], ref=numpy.max)
     return list([float(x) for x in numpy.mean(
-        frequency_spectrogram_data, axis=1).astype(numpy.float32)])
+        frequency_spectrogram_data, axis=1)])
 
 
 def eq_vector(data, bands=3, num_windows=100):
@@ -45,6 +50,10 @@ def loudness_at(data, pos, window_size=100):
         window_start = max(0, window_end - window_size)
     windowed = data[window_start:window_end]
     return root_mean_square(windowed)
+
+
+def loudness_of(data):
+    return root_mean_square(data)
 
 
 def loudness_vector(data, num_windows=100):

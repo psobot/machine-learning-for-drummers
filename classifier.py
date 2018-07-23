@@ -9,7 +9,7 @@ from __future__ import print_function
 # the JSON format we wrote them in and evaluating the resulting machine
 # learning model that we've created.
 from json_utils import read_data
-from model_utils import evaluate_model  # , explain_model
+from model_utils import evaluate_model
 
 # Here we import DecisionTreeClassifier, which is the machine learning
 # algorithm we'll be using to create our model.
@@ -37,13 +37,15 @@ def train_and_evaluate_model():
 
     # ...and we do the training, which creates our model!
     # vvv MACHINE LEARNING HAPPENS ON THIS LINE BELOW vvv
-    model = DecisionTreeClassifier().fit(training_features, training_classes)
+    model = DecisionTreeClassifier(random_state=2).fit(
+        training_features, training_classes)
     # ^^^ MACHINE LEARNING HAPPENS ON THIS LINE ABOVE ^^^
 
-    # This line writes out a .pdf file of the model's decision tree.
+    # These two lines write out a .pdf file of the model's decision tree.
     # It's useful if you want to explain the model, but requires
     # you to have Graphviz installed, so I've left it commented out.
-    #  explain_model(model, feature_names, class_names)
+    # from model_utils import explain_model
+    # explain_model(model, feature_names, class_names)
 
     print("Evaluating training accuracy...")
     evaluate_model(
@@ -51,7 +53,8 @@ def train_and_evaluate_model():
         training_features,
         training_classes,
         sample_names[:num_training_samples],
-        class_names
+        class_names,
+        output=False
     )
 
     # Now, here we take the other portion of our input data and use
