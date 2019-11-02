@@ -67,11 +67,14 @@ def extract_features(data_dir="./data/"):
             features[file] = features_for(file)
         except Exception as e:
             sys.stderr.write("Failed to run on %s: %s\n" % (file, e))
-    print(json.dumps(features, indent=4, sort_keys=True))
+    return features
+
 
 if __name__ == "__main__":
     import sys
     if sys.argv[-1].endswith('.py'):
-        extract_features()
+        features = extract_features()
     else:
-        extract_features(sys.argv[-1])
+        features = extract_features(sys.argv[-1])
+
+    print(json.dumps(features, indent=4, sort_keys=True))

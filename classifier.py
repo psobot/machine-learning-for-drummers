@@ -27,7 +27,7 @@ def train_and_evaluate_model():
     # Why not just train on all the data? That would result in a model that is
     # overfitted, or overly good at the data that it's seen and does poorly
     # with data that it hasn't seen.
-    training_percentage = 0.75
+    training_percentage = 0.85
     num_training_samples = int(len(features) * training_percentage)
 
     # Here we separate all of our features and classes into just the ones

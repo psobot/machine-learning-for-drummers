@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import math
+import random
 
 
 def read_data():
@@ -24,7 +25,11 @@ def read_data():
     sample_names = []
     features = []
     classes = []
-    for path, features_dict in data.items():
+
+    examples = list(data.items())
+    random.shuffle(examples)
+
+    for path, features_dict in examples:
         sample_names.append(path.split(os.sep)[-1])
 
         # Add the index of this class in class_names to the output list,
