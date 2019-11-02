@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 
+from builtins import zip
 import numpy
 
 from sklearn.tree import export_graphviz

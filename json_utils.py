@@ -13,10 +13,10 @@ def read_data():
     else:
         data = json.load(sys.stdin)
 
-    feature_names = sorted(data.values()[0])
+    feature_names = sorted(list(data.values())[0])
 
     class_names = set()
-    for path, features_dict in data.iteritems():
+    for path, features_dict in data.items():
         # Take the folder name of the sample as the class
         class_names.add(path.split(os.sep)[-2])
     class_names = sorted(class_names)
@@ -24,7 +24,7 @@ def read_data():
     sample_names = []
     features = []
     classes = []
-    for path, features_dict in data.iteritems():
+    for path, features_dict in data.items():
         sample_names.append(path.split(os.sep)[-1])
 
         # Add the index of this class in class_names to the output list,
