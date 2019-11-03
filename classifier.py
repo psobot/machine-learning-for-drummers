@@ -15,8 +15,12 @@ from model_utils import evaluate_model
 # algorithm we'll be using to create our model.
 from sklearn.tree import DecisionTreeClassifier
 
+# We'll use Pickle (as much as it's considered a bad practise)
+# to serialize our model for later recall.
+import pickle
 
-def train_and_evaluate_model():
+
+def train_model(output_file='model.bin'):
     # First, let's read all of the features that we got from feature_extract.
     # Fun fact: you could do ./feature_extract.py | ./classifier.py to execute
     # both the feature extraction and classification steps at once, without
@@ -41,6 +45,9 @@ def train_and_evaluate_model():
         training_features, training_classes)
     # ^^^ MACHINE LEARNING HAPPENS ON THIS LINE ABOVE ^^^
 
+    with open(output_file, 'wb') as out:
+        pickle.dump(model, out)
+
     # These two lines write out a .pdf file of the model's decision tree.
     # It's useful if you want to explain the model, but requires
     # you to have Graphviz installed, so I've left it commented out.
@@ -57,10 +64,16 @@ def train_and_evaluate_model():
         output=False
     )
 
+    return model
+
+
+def evaluate(model):
+    features, classes, sample_names, feature_names, class_names = read_data()
+
     # Now, here we take the other portion of our input data and use
     # that to test the model and ensure it performs well on data it
     # hasn't seen before.
-    num_test_samples = len(features) - num_training_samples
+    num_test_samples = int(0.15 * len(features))
     test_features, test_classes = \
         features[-num_test_samples:], classes[-num_test_samples:]
 
@@ -75,4 +88,5 @@ def train_and_evaluate_model():
 
 
 if __name__ == "__main__":
-    train_and_evaluate_model()
+    model = train_model()
+    evaluate(model)

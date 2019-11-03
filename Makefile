@@ -2,7 +2,7 @@
 
 all: pip features.json
 	@echo "Training and testing model..."
-	python3 classifier.py $<
+	python3 classifier.py features.json
 	@echo "Done!"
 
 pip: requirements.txt
