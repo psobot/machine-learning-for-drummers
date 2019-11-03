@@ -12,3 +12,6 @@ pip: requirements.txt
 features.json: feature_extract.py
 	@echo "Extracting features..."
 	python3 feature_extract.py > $@
+
+clean:
+	rm features.json
