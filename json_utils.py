@@ -5,6 +5,9 @@ import math
 import random
 
 
+STDIN_CACHED_DATA = None
+
+
 def read_data():
     filename = sys.argv[-1]
     if sys.stdin.isatty():
@@ -12,7 +15,10 @@ def read_data():
             filename = './features.json'
         data = json.load(open(filename))
     else:
-        data = json.load(sys.stdin)
+        global STDIN_CACHED_DATA
+        if not STDIN_CACHED_DATA:
+            STDIN_CACHED_DATA = json.load(sys.stdin)
+        data = STDIN_CACHED_DATA
 
     feature_names = sorted(list(data.values())[0])
 
